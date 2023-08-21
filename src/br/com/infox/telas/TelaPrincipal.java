@@ -71,10 +71,27 @@ public class TelaPrincipal extends JFrame {
 		menu.setBounds(0, 0, 709, 22);
 		contentPane.add(menu);
 		
+		JDesktopPane desktop = new JDesktopPane();
+		desktop.setPreferredSize(new Dimension(523, 490));
+		desktop.setBounds(0, 33, 523, 490);
+		contentPane.add(desktop);
+		
 		JMenu menCad = new JMenu("Cadastro");
 		menu.add(menCad);
 		
+		//CHAMANDO A TELA CLIENTE
 		JMenuItem menCadCli = new JMenuItem("Cliente");
+		menCadCli.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TelaCliente telaCliente = new TelaCliente();
+				telaCliente.setVisible(true);
+				desktop.add(telaCliente);
+				Dimension desktopSize = desktop.getSize ();
+				Dimension jInternalFrameSize = telaCliente.getSize ();
+				telaCliente.setLocation ((desktopSize.width - jInternalFrameSize.width)/2, (desktopSize.height- jInternalFrameSize.height)/2);
+			}
+		});
+		
 		menCadCli.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
 		menCad.add(menCadCli);
 		
@@ -107,7 +124,6 @@ public class TelaPrincipal extends JFrame {
 
 				TelaSobre telaSobre = new TelaSobre();
 				telaSobre.setVisible(true);
-
 			}
 		});
 		menAjuSob.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.ALT_DOWN_MASK));
@@ -131,10 +147,7 @@ public class TelaPrincipal extends JFrame {
 		menOpc.add(menOpcSai);
 		
 		
-		JDesktopPane desktop = new JDesktopPane();
-		desktop.setPreferredSize(new Dimension(523, 490));
-		desktop.setBounds(0, 33, 523, 490);
-		contentPane.add(desktop);
+	
 		
 		//ABRE O FORM TELAUSUARIO DENTRO DO DESKTOPPANE
 		menCadUsu.addActionListener(new ActionListener() {
