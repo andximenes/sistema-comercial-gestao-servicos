@@ -12,10 +12,18 @@ import javax.swing.JTable;
 
 import java.sql.*;
 import br.com.infox.dal.ModuloConexao;
+//importa recurso da biblioteca externa rs2xml.jar 
+import net.proteanit.sql.DbUtils;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class TelaCliente extends JInternalFrame {
 	private JTextField txtCliNome;
@@ -23,11 +31,11 @@ public class TelaCliente extends JInternalFrame {
 	private JTextField txtCliFone;
 	private JTextField txtCliEmail;
 	private JTextField txtCliPesquisar;
-	private JTable tblClientes;
 	
 	Connection conexao = null;
 	PreparedStatement pst = null;
 	ResultSet rs = null;
+	private JTable tblClientes;
 	
 
 	/**
@@ -50,6 +58,8 @@ public class TelaCliente extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public TelaCliente() {
+		setMaximizable(true);
+		setIconifiable(true);
 		
 		conexao = ModuloConexao.conector();
 		
@@ -95,10 +105,17 @@ public class TelaCliente extends JInternalFrame {
 		txtCliEmail.setColumns(10);
 		
 		JLabel lblNewLabel_7 = new JLabel("* Campos obrigatórios");
-		lblNewLabel_7.setBounds(325, 26, 119, 14);
+		lblNewLabel_7.setBounds(306, 26, 138, 14);
 		getContentPane().add(lblNewLabel_7);
 		
+		//O EVENTO ABAIXO É DO TIPO "EQUANTO FOR DIGITANDO"
 		txtCliPesquisar = new JTextField();
+		txtCliPesquisar.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				pesquisar_cliente();
+			}
+		});
 		txtCliPesquisar.setBounds(22, 23, 237, 20);
 		getContentPane().add(txtCliPesquisar);
 		txtCliPesquisar.setColumns(10);
@@ -107,10 +124,6 @@ public class TelaCliente extends JInternalFrame {
 		lblNewLabel_8.setIcon(new ImageIcon(TelaCliente.class.getResource("/br/com/infox/icones/icones/search.png")));
 		lblNewLabel_8.setBounds(269, 11, 46, 46);
 		getContentPane().add(lblNewLabel_8);
-		
-		tblClientes = new JTable();
-		tblClientes.setBounds(27, 70, 417, 72);
-		getContentPane().add(tblClientes);
 		
 		//CHAMA O MÉTODO ADICIONAR
 		JButton btnAdicionar = new JButton("");
@@ -132,6 +145,20 @@ public class TelaCliente extends JInternalFrame {
 		btRemover.setIcon(new ImageIcon(TelaCliente.class.getResource("/br/com/infox/icones/icones/delete.png")));
 		btRemover.setBounds(355, 348, 89, 76);
 		getContentPane().add(btRemover);
+		
+		//EVENTO PARA SETAR OS CAMPOS DA TABELA CLICANDO COM O MOUSE
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(22, 54, 426, 84);
+		getContentPane().add(scrollPane);
+		
+		tblClientes = new JTable();
+		tblClientes.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				setar_campos();
+			}
+		});
+		scrollPane.setViewportView(tblClientes);
 		
 
 	}
@@ -169,5 +196,33 @@ public class TelaCliente extends JInternalFrame {
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e);
 		}
+	}
+	
+	//PESQUISA CLIENTES PELO NOME COM FILTRO
+	private void pesquisar_cliente() {
+		String sql = "select * from clientes where nomeCli like ? ";
+		
+		try {
+			pst = conexao.prepareStatement(sql);
+			//Pasando o contúdo da caixa de pesquisa para o interrogação
+			//Atenção ao "%" que é a continuação da string sql
+			pst.setString(1, txtCliPesquisar.getText() + "%");
+			rs = pst.executeQuery();
+			//Usando a biblioteca rs2xml.jar para preencher a tabela
+			tblClientes.setModel(DbUtils.resultSetToTableModel(rs));
+			
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e);
+		}
+		
+	}
+	
+	//SETA O CAMPO DO FORMULÁRIO COM O CONTEÚDO DA TABELA
+	private void setar_campos() {
+		int setar = tblClientes.getSelectedRow();
+		txtCliNome.setText(tblClientes.getModel().getValueAt(setar, 1).toString());
+		txtCliEndereco.setText(tblClientes.getModel().getValueAt(setar, 2).toString());
+		txtCliFone.setText(tblClientes.getModel().getValueAt(setar, 3).toString());
+		txtCliEmail.setText(tblClientes.getModel().getValueAt(setar, 4).toString());
 	}
 }
