@@ -36,6 +36,7 @@ public class TelaCliente extends JInternalFrame {
 	PreparedStatement pst = null;
 	ResultSet rs = null;
 	private JTable tblClientes;
+	private JTextField txtCliId;
 	
 
 	/**
@@ -69,38 +70,38 @@ public class TelaCliente extends JInternalFrame {
 		getContentPane().setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("* Nome");
-		lblNewLabel.setBounds(22, 165, 46, 14);
+		lblNewLabel.setBounds(22, 205, 46, 14);
 		getContentPane().add(lblNewLabel);
 		
 		JLabel lblNewLabel_1 = new JLabel("Endereço");
-		lblNewLabel_1.setBounds(22, 206, 46, 14);
+		lblNewLabel_1.setBounds(22, 230, 46, 14);
 		getContentPane().add(lblNewLabel_1);
 		
 		JLabel lblNewLabel_2 = new JLabel("* Telefone");
-		lblNewLabel_2.setBounds(22, 245, 56, 14);
+		lblNewLabel_2.setBounds(22, 255, 56, 14);
 		getContentPane().add(lblNewLabel_2);
 		
 		JLabel lblNewLabel_3 = new JLabel("Email");
-		lblNewLabel_3.setBounds(22, 284, 46, 14);
+		lblNewLabel_3.setBounds(22, 289, 46, 14);
 		getContentPane().add(lblNewLabel_3);
 		
 		txtCliNome = new JTextField();
-		txtCliNome.setBounds(78, 162, 366, 20);
+		txtCliNome.setBounds(78, 191, 366, 20);
 		getContentPane().add(txtCliNome);
 		txtCliNome.setColumns(10);
 		
 		txtCliEndereco = new JTextField();
-		txtCliEndereco.setBounds(78, 203, 366, 20);
+		txtCliEndereco.setBounds(78, 222, 366, 20);
 		getContentPane().add(txtCliEndereco);
 		txtCliEndereco.setColumns(10);
 		
 		txtCliFone = new JTextField();
-		txtCliFone.setBounds(78, 242, 196, 20);
+		txtCliFone.setBounds(78, 253, 196, 20);
 		getContentPane().add(txtCliFone);
 		txtCliFone.setColumns(10);
 		
 		txtCliEmail = new JTextField();
-		txtCliEmail.setBounds(78, 281, 366, 20);
+		txtCliEmail.setBounds(78, 286, 366, 20);
 		getContentPane().add(txtCliEmail);
 		txtCliEmail.setColumns(10);
 		
@@ -136,7 +137,13 @@ public class TelaCliente extends JInternalFrame {
 		btnAdicionar.setBounds(78, 348, 89, 76);
 		getContentPane().add(btnAdicionar);
 		
+		//CHAMA O MÉTODO ALTERAR
 		JButton btnAlterar = new JButton("");
+		btnAlterar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				alterar();
+			}
+		});
 		btnAlterar.setIcon(new ImageIcon(TelaCliente.class.getResource("/br/com/infox/icones/icones/update.png")));
 		btnAlterar.setBounds(220, 348, 89, 76);
 		getContentPane().add(btnAlterar);
@@ -159,6 +166,16 @@ public class TelaCliente extends JInternalFrame {
 			}
 		});
 		scrollPane.setViewportView(tblClientes);
+		
+		JLabel lblNewLabel_4 = new JLabel("Id Cliente");
+		lblNewLabel_4.setBounds(22, 167, 46, 14);
+		getContentPane().add(lblNewLabel_4);
+		
+		txtCliId = new JTextField();
+		txtCliId.setEnabled(false);
+		txtCliId.setBounds(78, 160, 86, 20);
+		getContentPane().add(txtCliId);
+		txtCliId.setColumns(10);
 		
 
 	}
@@ -220,9 +237,45 @@ public class TelaCliente extends JInternalFrame {
 	//SETA O CAMPO DO FORMULÁRIO COM O CONTEÚDO DA TABELA
 	private void setar_campos() {
 		int setar = tblClientes.getSelectedRow();
+		txtCliId.setText(tblClientes.getModel().getValueAt(setar, 0).toString());
 		txtCliNome.setText(tblClientes.getModel().getValueAt(setar, 1).toString());
 		txtCliEndereco.setText(tblClientes.getModel().getValueAt(setar, 2).toString());
 		txtCliFone.setText(tblClientes.getModel().getValueAt(setar, 3).toString());
 		txtCliEmail.setText(tblClientes.getModel().getValueAt(setar, 4).toString());
+	}
+	
+	private void alterar() {
+		String sql = "update clientes set nomeCli=?, enderecoCli=?, foneCli=?, emailCli=? where idCli=?";
+		
+		try {
+			pst = conexao.prepareStatement(sql);
+			
+			pst.setString(1, txtCliNome.getText());
+			pst.setString(2, txtCliEndereco.getText());
+			pst.setString(3, txtCliFone.getText());
+			pst.setString(4, txtCliEmail.getText());
+			pst.setString(5, txtCliId.getText());
+			
+			if((txtCliNome.getText().isEmpty()) || (txtCliFone.getText().isEmpty())){
+				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios (*)");
+			} else {
+				//Atualiza a tabela usuário com os dados do formulário
+				//A estrutura abaixo altera os dados na tabela
+				int adicionado = pst.executeUpdate();
+				//A linha abaixo serve de entendimento da lógica
+				//System.out.println(adicionado);
+				if(adicionado > 0) {
+					JOptionPane.showMessageDialog(null, "Dados do Cliente alterados com sucesso");
+					//Limpam os campos
+					txtCliNome.setText(null);
+					txtCliEndereco.setText(null);
+					txtCliFone.setText(null);
+					txtCliEmail.setText(null);
+				}
+			}
+			
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e);
+		}
 	}
 }
