@@ -237,11 +237,7 @@ public class TelaUsuario extends JInternalFrame {
 				if(adicionado > 0) {
 					JOptionPane.showMessageDialog(null, "Usuário adicionado com sucesso");
 					//Limpam os campos
-					txtUsuId.setText(null);
-					txtUsuNome.setText(null);
-					txtUsuFone.setText(null);
-					txtUsuLogin.setText(null);
-					txtUsuSenha.setText(null);
+					limpar();
 				}
 			}
 			
@@ -274,11 +270,7 @@ public class TelaUsuario extends JInternalFrame {
 				if(adicionado > 0) {
 					JOptionPane.showMessageDialog(null, "Dados do Usuário alterados com sucesso");
 					//Limpam os campos
-					txtUsuId.setText(null);
-					txtUsuNome.setText(null);
-					txtUsuFone.setText(null);
-					txtUsuLogin.setText(null);
-					txtUsuSenha.setText(null);
+					limpar();
 				}
 			}
 			
@@ -299,16 +291,21 @@ public class TelaUsuario extends JInternalFrame {
 				int apagado = pst.executeUpdate();
 				if(apagado > 0 ) {
 					JOptionPane.showMessageDialog(null, "Usuário removido com sucesso.");
-					txtUsuId.setText(null);
-					txtUsuNome.setText(null);
-					txtUsuFone.setText(null);
-					txtUsuLogin.setText(null);
-					txtUsuSenha.setText(null);
+					limpar();
 				}
 			
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, e);
 			}
 		}
+	}
+	
+	//LIMPA OS CAMPOS DO FORMULÁRIO
+	private void limpar() {
+		txtUsuId.setText(null);
+		txtUsuNome.setText(null);
+		txtUsuFone.setText(null);
+		txtUsuLogin.setText(null);
+		txtUsuSenha.setText(null);
 	}
 }

@@ -71,7 +71,7 @@ public class TelaCliente extends JInternalFrame {
 		getContentPane().setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("* Nome");
-		lblNewLabel.setBounds(22, 205, 46, 14);
+		lblNewLabel.setBounds(22, 194, 46, 14);
 		getContentPane().add(lblNewLabel);
 		
 		JLabel lblNewLabel_1 = new JLabel("Endereço");
@@ -164,7 +164,25 @@ public class TelaCliente extends JInternalFrame {
 		scrollPane.setBounds(22, 54, 426, 84);
 		getContentPane().add(scrollPane);
 		
+		//TABELA DE CLIENTES
 		tblClientes = new JTable();
+		//Sobrescrevendo a JTable
+		tblClientes = new JTable() {
+			//NÃO PERMITE A EDIÇÃO DIRETO NA TABELA
+			public boolean isCellEditable(int rowIndex, int colIndex) {
+				return false;
+			}
+		};
+		tblClientes.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Id", "Nome", "Endereço", "Fone", "Email"
+			}
+		));
+		tblClientes.getTableHeader().setReorderingAllowed(false); //desativa a reordenação de colunas da jTable 
+
+		//CHAMA O MÉTODO SETAR_CAMPOS
 		tblClientes.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -208,10 +226,7 @@ public class TelaCliente extends JInternalFrame {
 				if(adicionado > 0) {
 					JOptionPane.showMessageDialog(null, "Cliente adicionado com sucesso");
 					//Limpam os campos
-					txtCliNome.setText(null);
-					txtCliEndereco.setText(null);
-					txtCliFone.setText(null);
-					txtCliEmail.setText(null);
+					limpar();
 					
 				}
 			}
@@ -223,7 +238,7 @@ public class TelaCliente extends JInternalFrame {
 	
 	//PESQUISA CLIENTES PELO NOME COM FILTRO
 	private void pesquisar_cliente() {
-		String sql = "select * from clientes where nomeCli like ? ";
+		String sql = "select idCli as Id, nomeCli as Nome, enderecoCli as Endereço, foneCli as Fone, emailCli as Email from clientes where nomeCli like?";
 		
 		try {
 			pst = conexao.prepareStatement(sql);
@@ -276,10 +291,7 @@ public class TelaCliente extends JInternalFrame {
 				if(adicionado > 0) {
 					JOptionPane.showMessageDialog(null, "Dados do Cliente alterados com sucesso");
 					//Limpam os campos
-					txtCliNome.setText(null);
-					txtCliEndereco.setText(null);
-					txtCliFone.setText(null);
-					txtCliEmail.setText(null);
+					limpar();
 					//REATIVA O BTN ADICIONAR
 					btnAdicionar.setEnabled(true);
 				}
@@ -302,11 +314,8 @@ public class TelaCliente extends JInternalFrame {
 				int apagado = pst.executeUpdate();
 				if(apagado > 0 ) {
 					JOptionPane.showMessageDialog(null, "Usuário removido com sucesso.");
-					txtCliId.setText(null);
-					txtCliNome.setText(null);
-					txtCliEndereco.setText(null);
-					txtCliFone.setText(null);
-					txtCliEmail.setText(null);
+					//Limpa os campos
+					limpar();
 					//REATIVA O BTN ADICIONAR
 					btnAdicionar.setEnabled(true);
 				}
@@ -315,5 +324,18 @@ public class TelaCliente extends JInternalFrame {
 				JOptionPane.showMessageDialog(null, e);
 			}
 		}
+	}
+
+	private void limpar() {
+		//LIMPA OS CAMPOS DO FORMULÁRIO
+		txtCliPesquisar.setText(null);
+		txtCliId.setText(null);
+		txtCliNome.setText(null);
+		txtCliEndereco.setText(null);
+		txtCliFone.setText(null);
+		txtCliEmail.setText(null);
+		//LIMPA A JTABLE
+		((DefaultTableModel) tblClientes.getModel()).setRowCount(0); 
+		
 	}
 }
