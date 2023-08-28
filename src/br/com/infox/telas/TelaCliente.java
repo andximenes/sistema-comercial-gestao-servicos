@@ -31,6 +31,7 @@ public class TelaCliente extends JInternalFrame {
 	private JTextField txtCliFone;
 	private JTextField txtCliEmail;
 	private JTextField txtCliPesquisar;
+	private JButton btnAdicionar = new JButton("");
 	
 	Connection conexao = null;
 	PreparedStatement pst = null;
@@ -127,7 +128,6 @@ public class TelaCliente extends JInternalFrame {
 		getContentPane().add(lblNewLabel_8);
 		
 		//CHAMA O MÉTODO ADICIONAR
-		JButton btnAdicionar = new JButton("");
 		btnAdicionar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				adicionar();
@@ -148,7 +148,13 @@ public class TelaCliente extends JInternalFrame {
 		btnAlterar.setBounds(220, 348, 89, 76);
 		getContentPane().add(btnAlterar);
 		
+		//CHAMA O MÉTODO REMOVER
 		JButton btRemover = new JButton("");
+		btRemover.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				remover();
+			}
+		});
 		btRemover.setIcon(new ImageIcon(TelaCliente.class.getResource("/br/com/infox/icones/icones/delete.png")));
 		btRemover.setBounds(355, 348, 89, 76);
 		getContentPane().add(btRemover);
@@ -242,6 +248,9 @@ public class TelaCliente extends JInternalFrame {
 		txtCliEndereco.setText(tblClientes.getModel().getValueAt(setar, 2).toString());
 		txtCliFone.setText(tblClientes.getModel().getValueAt(setar, 3).toString());
 		txtCliEmail.setText(tblClientes.getModel().getValueAt(setar, 4).toString());
+		
+		//DESABILITA O BTN ADICIONAR AO SETAR OS CAMPOS DA TABELA
+		btnAdicionar.setEnabled(false);
 	}
 	
 	private void alterar() {
@@ -271,11 +280,40 @@ public class TelaCliente extends JInternalFrame {
 					txtCliEndereco.setText(null);
 					txtCliFone.setText(null);
 					txtCliEmail.setText(null);
+					//REATIVA O BTN ADICIONAR
+					btnAdicionar.setEnabled(true);
 				}
 			}
 			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	
+	private void remover() {
+		//confiar a remoção do usuário
+		int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover este Cliente", "Atenção", JOptionPane.YES_NO_OPTION);
+		
+		if(confirma == JOptionPane.YES_OPTION ) {
+			String sql = "delete from clientes where idCli=?";
+			try {
+				pst = conexao.prepareStatement(sql);
+				pst.setString(1, txtCliId.getText());
+				int apagado = pst.executeUpdate();
+				if(apagado > 0 ) {
+					JOptionPane.showMessageDialog(null, "Usuário removido com sucesso.");
+					txtCliId.setText(null);
+					txtCliNome.setText(null);
+					txtCliEndereco.setText(null);
+					txtCliFone.setText(null);
+					txtCliEmail.setText(null);
+					//REATIVA O BTN ADICIONAR
+					btnAdicionar.setEnabled(true);
+				}
+			
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, e);
+			}
 		}
 	}
 }
