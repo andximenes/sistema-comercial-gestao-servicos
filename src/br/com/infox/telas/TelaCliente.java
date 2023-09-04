@@ -60,13 +60,14 @@ public class TelaCliente extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public TelaCliente() {
+		setClosable(true);
 		setMaximizable(true);
 		setIconifiable(true);
 		
 		conexao = ModuloConexao.conector();
 		
 		setTitle("Clientes");
-		setPreferredSize(new Dimension(523, 490));
+		setPreferredSize(new Dimension(530, 607));
 		setBounds(100, 100, 523, 490);
 		getContentPane().setLayout(null);
 		

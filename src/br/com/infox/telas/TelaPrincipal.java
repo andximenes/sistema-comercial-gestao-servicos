@@ -58,7 +58,7 @@ public class TelaPrincipal extends JFrame {
 		setResizable(false);
 		setTitle("X - Sistema para controle de serviços");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 715, 573);
+		setBounds(100, 100, 715, 690);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setToolTipText("");
@@ -72,8 +72,7 @@ public class TelaPrincipal extends JFrame {
 		contentPane.add(menu);
 		
 		JDesktopPane desktop = new JDesktopPane();
-		desktop.setPreferredSize(new Dimension(523, 490));
-		desktop.setBounds(0, 33, 523, 490);
+		desktop.setBounds(10, 33, 530, 607);
 		contentPane.add(desktop);
 		
 		JMenu menCad = new JMenu("Cadastro");
@@ -91,65 +90,25 @@ public class TelaPrincipal extends JFrame {
 				telaCliente.setLocation ((desktopSize.width - jInternalFrameSize.width)/2, (desktopSize.height- jInternalFrameSize.height)/2);
 			}
 		});
-		
 		menCadCli.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
 		menCad.add(menCadCli);
 		
+		//CHAMANDO TELA DE ORDEM DE SERVIÇO
 		JMenuItem menCadOs = new JMenuItem("Ordem de Serviço");
+		menCadOs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TelaOs telaOs = new TelaOs();
+				telaOs.setVisible(true);
+				desktop.add(telaOs);
+				Dimension desktopSize = desktop.getSize ();
+				Dimension jInternalFrameSize = telaOs.getSize ();
+				telaOs.setLocation ((desktopSize.width - jInternalFrameSize.width)/2, (desktopSize.height- jInternalFrameSize.height)/2);
+			}
+		});
 		menCadOs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.ALT_DOWN_MASK));
 		menCad.add(menCadOs);
 
-		
-		//MENU USUÁRIO PARAMENTROS
-		menCadUsu.setEnabled(false);
-		menCadUsu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_DOWN_MASK));
-		menCad.add(menCadUsu);
-		
-		
-		// MENU RELATÓRIO PARAMENTROS
-		menRel.setEnabled(false);
-		menu.add(menRel);
-		
-		JMenuItem menRelSer = new JMenuItem("Serviços");
-		menRelSer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));
-		menRel.add(menRelSer);
-		
-		JMenu menuiAju = new JMenu("Ajuda");
-		menu.add(menuiAju);
-		
-		// CHAMANDO A TELA SOBRE
-		JMenuItem menAjuSob = new JMenuItem("Sobre");
-		menAjuSob.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				TelaSobre telaSobre = new TelaSobre();
-				telaSobre.setVisible(true);
-			}
-		});
-		menAjuSob.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.ALT_DOWN_MASK));
-		menuiAju.add(menAjuSob);
-		
-		
-		JMenu menOpc = new JMenu("Opções");
-		menu.add(menOpc);
-		
-		//EXIBE A CAIXA DE DIÁLOGO SAIR
-		JMenuItem menOpcSai = new JMenuItem("Sair");
-		menOpcSai.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja sair?", "Atenção", JOptionPane.YES_NO_OPTION);
-				if(sair == JOptionPane.YES_NO_OPTION) {
-					System.exit(0);
-				}
-			}
-		});
-		menOpcSai.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_DOWN_MASK));
-		menOpc.add(menOpcSai);
-		
-		
-	
-		
-		//ABRE O FORM TELAUSUARIO DENTRO DO DESKTOPPANE
+		//CHAMANDO A TELA DE USUÁRIO
 		menCadUsu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				TelaUsuario telaUsuario = new TelaUsuario();
@@ -162,7 +121,24 @@ public class TelaPrincipal extends JFrame {
 				
 			}
 		});
+		//MENU USUÁRIO PARAMENTROS
+		menCadUsu.setEnabled(false);
+		menCadUsu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_DOWN_MASK));
+		menCad.add(menCadUsu);
 		
+		// MENU RELATÓRIO PARAMENTROS
+		menRel.setEnabled(false);
+		menu.add(menRel);
+		
+		JMenuItem menRelSer = new JMenuItem("Serviços");
+		menRelSer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));
+		menRel.add(menRelSer);
+		
+		JMenu menuiAju = new JMenu("Ajuda");
+		menu.add(menuiAju);
+		
+		JMenu menOpc = new JMenu("Opções");
+		menu.add(menOpc);
 		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(TelaPrincipal.class.getResource("/br/com/infox/icones/icones/x.png")));
@@ -181,6 +157,7 @@ public class TelaPrincipal extends JFrame {
 		lblData.setBounds(533, 102, 156, 39);
 		contentPane.add(lblData);
 		
+		//DATA E HORA ATUAL DO SISTEMA
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowActivated(WindowEvent e) {
