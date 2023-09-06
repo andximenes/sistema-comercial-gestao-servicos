@@ -24,7 +24,11 @@ import net.proteanit.sql.DbUtils;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent; //preenche a tabela
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent; //preenche a tabela
 
 
 
@@ -39,11 +43,14 @@ public class TelaOs extends JInternalFrame {
 	private JTextField txtOSValor;
 	private JTextField txtOsServ;
 	private JTextField txtOsTec;
-	
+	private JComboBox cboOsSit = new JComboBox();
 	//VARIÁVEIS PARA ESTABELECER A CONEXÃO
 	Connection conexao = null;
 	PreparedStatement pst = null;
 	ResultSet rs = null;
+	
+	//A VAR ABAIXO ARMAZENA UM TEXTO DE ACORDO COM O RADIO BTN SELECIONADO
+	private String tipo;
 	
 	/**
 	 * Launch the application.
@@ -65,6 +72,19 @@ public class TelaOs extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public TelaOs() {
+		
+		//OBJETOS RADIO BTN
+		JRadioButton rbtOrc = new JRadioButton("Orçamento");
+		JRadioButton rbtOs = new JRadioButton("Ordem de Serviço");
+		
+		//AO ABRIR O FORMULÁRIO, MARCAR O RADIO BTN "ORÇAMENTO"
+		addInternalFrameListener(new InternalFrameAdapter() {
+			@Override
+			public void internalFrameOpened(InternalFrameEvent e) {
+				rbtOrc.setSelected(true);
+				tipo = "Orçamento"; //Já seta a var com o valor "ORÇAMENTO"
+			}
+		});
 		
 		conexao = ModuloConexao.conector();
 		
@@ -101,12 +121,23 @@ public class TelaOs extends JInternalFrame {
 		panel.add(txtData);
 		txtData.setColumns(10);
 		
-		//RADIO BUTTONS
-		JRadioButton rbtOrc = new JRadioButton("Orçamento");
+		//RADIO BUTTONS ORÇAMENTO
+		rbtOrc.addActionListener(new ActionListener() {
+			//Atribuindo um txt a variável (tipo) se selecionado
+			public void actionPerformed(ActionEvent e) {
+				tipo = "Orçamento";
+			}
+		});
 		rbtOrc.setBounds(10, 63, 92, 23);
 		panel.add(rbtOrc);
 		
-		JRadioButton rbtOs = new JRadioButton("Ordem de Serviço");
+		//RADIO BUTTONS ORÇAMENTO ORDEM DE SERVIÇO
+		rbtOs.addActionListener(new ActionListener() {
+			//Atribuindo um txt a variável (tipo) se selecionado
+			public void actionPerformed(ActionEvent e) {
+				tipo = "Ordem de Serviço";
+			}
+		});
 		rbtOs.setBounds(104, 63, 131, 23);
 		panel.add(rbtOs);
 		
@@ -119,8 +150,8 @@ public class TelaOs extends JInternalFrame {
 		lblNewLabel_2.setBounds(261, 15, 50, 14);
 		getContentPane().add(lblNewLabel_2);
 		
-		JComboBox cboOsSit = new JComboBox();
-		cboOsSit.setModel(new DefaultComboBoxModel(new String[] {"Entrega OK", "Orçamento reprovado", "aguardando aprovação", "Aguardando peças", "Abandonado pelo cliente", "Na bancada", "Retornou"}));
+		
+		cboOsSit.setModel(new DefaultComboBoxModel(new String[] {"Na bancada", "Entrega OK", "Orçamento reprovado", "aguardando aprovação", "Aguardando peças", "Abandonado pelo cliente", "Retornou"}));
 		cboOsSit.setBounds(313, 11, 184, 22);
 		getContentPane().add(cboOsSit);
 		
@@ -192,8 +223,8 @@ public class TelaOs extends JInternalFrame {
 		));
 		scrollPane.setViewportView(tblClientes);
 		
-		JLabel lblNewLabel_5 = new JLabel("Equipamento");
-		lblNewLabel_5.setBounds(20, 306, 76, 14);
+		JLabel lblNewLabel_5 = new JLabel("*Equipamento");
+		lblNewLabel_5.setBounds(10, 306, 76, 14);
 		getContentPane().add(lblNewLabel_5);
 		
 		txtOsEquipe = new JTextField();
@@ -215,6 +246,7 @@ public class TelaOs extends JInternalFrame {
 		getContentPane().add(lblNewLabel_7);
 		
 		txtOSValor = new JTextField();
+		txtOSValor.setText("0");
 		txtOSValor.setBounds(402, 303, 66, 20);
 		getContentPane().add(txtOSValor);
 		txtOSValor.setColumns(10);
@@ -237,7 +269,13 @@ public class TelaOs extends JInternalFrame {
 		getContentPane().add(txtOsTec);
 		txtOsTec.setColumns(10);
 		
+		//CHAMA O MÉTODO EMITIR ORDEM DE SERVIÇO
 		JButton btnOsAdicionar = new JButton("");
+		btnOsAdicionar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				emitir_os();
+			}
+		});
 		btnOsAdicionar.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/create.png")));
 		btnOsAdicionar.setBounds(20, 428, 76, 76);
 		getContentPane().add(btnOsAdicionar);
@@ -287,5 +325,43 @@ public class TelaOs extends JInternalFrame {
 		txtCliId.setText(tblClientes.getModel().getValueAt(setar, 0).toString());
 	}
 	
-	
+	//CADASTRA UMA ORDEM DE SERVIÇO
+	private void emitir_os(){
+		String sql = "insert into ordemservico (tipo, situacao, equipamento, defeito, servico, tecnico, valor, idCli)values (?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		try {
+			pst = conexao.prepareStatement(sql);
+			pst.setString(1, tipo);
+			pst.setString(2, cboOsSit.getSelectedItem().toString());
+			pst.setString(3, txtOsEquipe.getText());
+			pst.setString(4, txtOsDef.getText());
+			pst.setString(5, txtOsServ.getText());
+			pst.setString(6, txtOsTec.getText());
+			pst.setString(7, txtOSValor.getText().replace(",", ".")); //.replace substitui a virgula pelo ponto para não dar erro caso o usuário coloque uma virgula no campo valor
+			pst.setString(8, txtCliId.getText());
+			
+			//VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS
+			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty())) {
+				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");				
+			}else {
+				int adicionado = pst.executeUpdate();
+				if(adicionado > 0) {
+					JOptionPane.showMessageDialog(null, "Ordem de serviço emitda com sucesso!");
+					limpar();
+				}
+			}
+			
+		}catch(Exception e) {
+			JOptionPane.showMessageDialog(null, e);
+		}
+	}
+	//LIMPA OS CAMPOS
+	private void limpar() {
+		txtCliId.setText(null);
+		txtOsEquipe.setText(null);
+		txtOsDef.setText(null);
+		txtOsServ.setText(null);
+		txtOsTec.setText(null);
+		txtOSValor.setText(null);
+	}
 }

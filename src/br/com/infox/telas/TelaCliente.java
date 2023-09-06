@@ -60,6 +60,7 @@ public class TelaCliente extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public TelaCliente() {
+		
 		setClosable(true);
 		setMaximizable(true);
 		setIconifiable(true);
