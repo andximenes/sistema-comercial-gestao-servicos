@@ -67,8 +67,7 @@ public class TelaCliente extends JInternalFrame {
 		conexao = ModuloConexao.conector();
 		
 		setTitle("Clientes");
-		setPreferredSize(new Dimension(530, 607));
-		setBounds(100, 100, 523, 490);
+		setBounds(100, 100, 530, 607);
 		getContentPane().setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("* Nome");

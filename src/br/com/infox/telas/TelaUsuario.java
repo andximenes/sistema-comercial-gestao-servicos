@@ -60,9 +60,9 @@ public class TelaUsuario extends JInternalFrame {
 		setMaximizable(true);
 		setIconifiable(true);
 		setClosable(true);
-		setPreferredSize(new Dimension(530, 607));
+		
 		setTitle("Usuários");
-		setBounds(100, 100, 540, 580);
+		setBounds(100, 100, 530, 607);
 		getContentPane().setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("* Id");
