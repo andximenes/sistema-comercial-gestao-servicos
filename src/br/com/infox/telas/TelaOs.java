@@ -295,7 +295,13 @@ public class TelaOs extends JInternalFrame {
 		btnOsAlterar.setBounds(216, 428, 76, 76);
 		getContentPane().add(btnOsAlterar);
 		
+		//CHAMA O MÉTODO EXLUIR ORDEM DE SERVIÇO
 		JButton btnOsRemover = new JButton("");
+		btnOsRemover.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				excluir_os();
+			}
+		});
 		btnOsRemover.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/delete.png")));
 		btnOsRemover.setBounds(316, 428, 76, 76);
 		getContentPane().add(btnOsRemover);
@@ -304,7 +310,7 @@ public class TelaOs extends JInternalFrame {
 		JButton btnOsPesquisar = new JButton("");
 		btnOsPesquisar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				pesquisa_ordem_servico();
+				pesquisa_os();
 			}
 		});
 		btnOsPesquisar.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/read.png")));
@@ -373,7 +379,7 @@ public class TelaOs extends JInternalFrame {
 	}
 	
 	//PESQUISA UMA ORDEM DE SERVICO
-	private void pesquisa_ordem_servico() {
+	private void pesquisa_os() {
 		//CRIA UMA CAIXA DE ENTRADA TIPO JOption Pane
 		String num_os = JOptionPane.showInputDialog("Digite o número da OS "); //RECEBE O NUMERO DA OS
 		
@@ -471,6 +477,45 @@ public class TelaOs extends JInternalFrame {
 		}
 		
 	}
+	
+	//EXCLUI UMA ORDEM DE SERVIÇO
+	private void excluir_os() {
+		
+		//confirma a remoção do usuário
+		int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover esta OS? ", "Atenção", JOptionPane.YES_NO_OPTION);
+		
+		if(confirma == JOptionPane.YES_OPTION ) {
+			String sql = "delete from ordemservico where oS = ?";
+			try {
+				pst = conexao.prepareStatement(sql);
+				pst.setString(1, txtOs.getText());
+				
+				int apagado = pst.executeUpdate();
+				
+				if(apagado > 0 ) {
+					JOptionPane.showMessageDialog(null, "Ordem de serviço removida com sucesso.");
+					
+					//LIMPA OS CAMPOS
+					txtCliId.setText(null);
+					txtData.setText(null);
+					limpar();
+					
+					//HABILITA O BOTÃO ADICIONAR
+					btnOsAdicionar.setEnabled(true);
+					
+					//HABILITA O CAMPO PESQUISAR
+					txtCliPesquisar.setEnabled(true);
+					
+					//HABILITA A VISIBILIDADE DA TABELA CLIENTES
+					tblClientes.setVisible(true);
+				}
+			
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, e);
+			}
+		}
+	}
+	
 	
 	//LIMPA OS CAMPOS
 	private void limpar() {

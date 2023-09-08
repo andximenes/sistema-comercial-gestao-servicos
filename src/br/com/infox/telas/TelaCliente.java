@@ -304,7 +304,7 @@ public class TelaCliente extends JInternalFrame {
 	}
 	
 	private void remover() {
-		//confiar a remoção do usuário
+		//confirma a remoção do usuário
 		int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover este Cliente", "Atenção", JOptionPane.YES_NO_OPTION);
 		
 		if(confirma == JOptionPane.YES_OPTION ) {
