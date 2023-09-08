@@ -28,7 +28,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent; //preenche a tabela
+import javax.swing.event.InternalFrameEvent;
+import java.awt.Font; //preenche a tabela
 
 
 
@@ -43,7 +44,13 @@ public class TelaOs extends JInternalFrame {
 	private JTextField txtOSValor;
 	private JTextField txtOsServ;
 	private JTextField txtOsTec;
+	
 	private JComboBox cboOsSit = new JComboBox();
+	private JRadioButton rbtOrc = new JRadioButton("Orçamento");
+	private JRadioButton rbtOs = new JRadioButton("Ordem de Serviço");
+	
+	private JButton btnOsAdicionar = new JButton("");
+	
 	//VARIÁVEIS PARA ESTABELECER A CONEXÃO
 	Connection conexao = null;
 	PreparedStatement pst = null;
@@ -72,11 +79,7 @@ public class TelaOs extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public TelaOs() {
-		
-		//OBJETOS RADIO BTN
-		JRadioButton rbtOrc = new JRadioButton("Orçamento");
-		JRadioButton rbtOs = new JRadioButton("Ordem de Serviço");
-		
+				
 		//AO ABRIR O FORMULÁRIO, MARCAR O RADIO BTN "ORÇAMENTO"
 		addInternalFrameListener(new InternalFrameAdapter() {
 			@Override
@@ -111,13 +114,14 @@ public class TelaOs extends JInternalFrame {
 		
 		txtOs = new JTextField();
 		txtOs.setEditable(false);
-		txtOs.setBounds(10, 36, 62, 20);
+		txtOs.setBounds(10, 36, 36, 20);
 		panel.add(txtOs);
 		txtOs.setColumns(10);
 		
 		txtData = new JTextField();
+		txtData.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		txtData.setEditable(false);
-		txtData.setBounds(104, 36, 86, 20);
+		txtData.setBounds(104, 36, 127, 20);
 		panel.add(txtData);
 		txtData.setColumns(10);
 		
@@ -270,7 +274,7 @@ public class TelaOs extends JInternalFrame {
 		txtOsTec.setColumns(10);
 		
 		//CHAMA O MÉTODO EMITIR ORDEM DE SERVIÇO
-		JButton btnOsAdicionar = new JButton("");
+		
 		btnOsAdicionar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				emitir_os();
@@ -280,19 +284,31 @@ public class TelaOs extends JInternalFrame {
 		btnOsAdicionar.setBounds(20, 428, 76, 76);
 		getContentPane().add(btnOsAdicionar);
 		
+		//CHAMA O MÉTODO ALTERAR ORDEM DE SERVIÇO
 		JButton btnOsAlterar = new JButton("");
+		btnOsAlterar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				alterar_os();
+			}
+		});
 		btnOsAlterar.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/update.png")));
-		btnOsAlterar.setBounds(117, 428, 76, 76);
+		btnOsAlterar.setBounds(216, 428, 76, 76);
 		getContentPane().add(btnOsAlterar);
 		
 		JButton btnOsRemover = new JButton("");
 		btnOsRemover.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/delete.png")));
-		btnOsRemover.setBounds(218, 428, 76, 76);
+		btnOsRemover.setBounds(316, 428, 76, 76);
 		getContentPane().add(btnOsRemover);
 		
+		//CHAMA O MÉTODO DE PESQUISA DE ORDEM DE SERVIÇO
 		JButton btnOsPesquisar = new JButton("");
+		btnOsPesquisar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pesquisa_ordem_servico();
+			}
+		});
 		btnOsPesquisar.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/read.png")));
-		btnOsPesquisar.setBounds(313, 428, 76, 76);
+		btnOsPesquisar.setBounds(118, 428, 76, 76);
 		getContentPane().add(btnOsPesquisar);
 		
 		JButton btnOsImprimir = new JButton("");
@@ -355,6 +371,107 @@ public class TelaOs extends JInternalFrame {
 			JOptionPane.showMessageDialog(null, e);
 		}
 	}
+	
+	//PESQUISA UMA ORDEM DE SERVICO
+	private void pesquisa_ordem_servico() {
+		//CRIA UMA CAIXA DE ENTRADA TIPO JOption Pane
+		String num_os = JOptionPane.showInputDialog("Digite o número da OS "); //RECEBE O NUMERO DA OS
+		
+		String slq = "Select * from ordemservico where oS = " + num_os;
+		
+		try {
+			pst = conexao.prepareStatement(slq);
+			rs = pst.executeQuery(); // MOSTRA O RESULTADO NO FORMULÁRIO
+			
+			if(rs.next()) {
+				
+				txtOs.setText(rs.getString(1));
+				txtData.setText(rs.getString(2));
+				
+				//SETANDO OS RADIO BTN
+				String rbt_tipo = rs.getString(3);
+				if(rbt_tipo.equals("Ordem de Serviço")) {
+					rbtOs.setSelected(true);
+					tipo = "Ordem de serviço";
+				}else {
+					rbtOrc.setSelected(true);
+					tipo = "Orçamento";
+				}
+				
+				cboOsSit.setSelectedItem(rs.getString(4)); //PEGANDO O VALOR DA CAIXA DE OPÇÕES "SITUAÇÃO"
+				txtOsEquipe.setText(rs.getString(5));
+				txtOsDef.setText(rs.getString(6));
+				txtOsServ.setText(rs.getString(7));
+				txtOsTec.setText(rs.getString(8));
+				txtOSValor.setText(rs.getString(9));
+				txtCliId.setText(rs.getString(10));
+				
+				//DESABILITA O BOTÃO ADICIONAR
+				btnOsAdicionar.setEnabled(false);
+				
+				//DESABILITA O CAMPO PESQUISAR
+				txtCliPesquisar.setEnabled(false);
+				
+				//DESABILITA A VISIBILIDADE DA TABELA CLIENTES
+				tblClientes.setVisible(false);
+			} else {
+				JOptionPane.showMessageDialog(null, "Ordem de serviço não cadastrada");
+			}
+				//TRATA A MENSAGEM DE ERRO CASO O USUÁRIO DIGITE UMA LETRA
+		} catch (java.sql.SQLSyntaxErrorException e) {
+			JOptionPane.showMessageDialog(null, "OS inválida");
+		
+		} catch (Exception e2) {
+			JOptionPane.showMessageDialog(null, e2);
+			
+		}
+	}
+	
+	//ALTERA UMA ORDEM DE SERVIÇO
+	private void alterar_os(){
+		String sql = "update ordemservico set tipo=?, situacao=?, equipamento=?, defeito=?, servico=?, tecnico=?, valor=? where oS = ?";
+		
+		try {
+			pst = conexao.prepareStatement(sql);
+			pst.setString(1, tipo);
+			pst.setString(2, cboOsSit.getSelectedItem().toString());
+			pst.setString(3, txtOsEquipe.getText());
+			pst.setString(4, txtOsDef.getText());
+			pst.setString(5, txtOsServ.getText());
+			pst.setString(6, txtOsTec.getText());
+			pst.setString(7, txtOSValor.getText().replace(",", ".")); //.replace substitui a virgula pelo ponto para não dar erro caso o usuário coloque uma virgula no campo valor
+			pst.setString(8, txtOs.getText());
+			
+			//VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS
+			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty())) {
+				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");				
+			}else {
+				int adicionado = pst.executeUpdate();
+				if(adicionado > 0) {
+					JOptionPane.showMessageDialog(null, "Ordem de serviço alterada com sucesso!");
+					
+					//LIMPA OS CAMPOS
+					txtCliId.setText(null);
+					txtData.setText(null);
+					limpar();
+					
+					//HABILITA O BOTÃO ADICIONAR
+					btnOsAdicionar.setEnabled(true);
+					
+					//HABILITA O CAMPO PESQUISAR
+					txtCliPesquisar.setEnabled(true);
+					
+					//HABILITA A VISIBILIDADE DA TABELA CLIENTES
+					tblClientes.setVisible(true);
+				}
+			}
+			
+		}catch(Exception e) {
+			JOptionPane.showMessageDialog(null, e);
+		}
+		
+	}
+	
 	//LIMPA OS CAMPOS
 	private void limpar() {
 		txtCliId.setText(null);
