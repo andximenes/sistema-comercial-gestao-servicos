@@ -49,7 +49,11 @@ public class TelaOs extends JInternalFrame {
 	private JRadioButton rbtOrc = new JRadioButton("Orçamento");
 	private JRadioButton rbtOs = new JRadioButton("Ordem de Serviço");
 	
+	private JButton btnOsPesquisar = new JButton("");
+	private JButton btnOsImprimir = new JButton("");
 	private JButton btnOsAdicionar = new JButton("");
+	private JButton btnOsRemover = new JButton("");
+	private JButton btnOsAlterar = new JButton("");
 	
 	//VARIÁVEIS PARA ESTABELECER A CONEXÃO
 	Connection conexao = null;
@@ -150,12 +154,12 @@ public class TelaOs extends JInternalFrame {
 		grupo.add(rbtOs);
 		grupo.add(rbtOrc);
 		
-		JLabel lblNewLabel_2 = new JLabel("Situação");
-		lblNewLabel_2.setBounds(261, 15, 50, 14);
+		JLabel lblNewLabel_2 = new JLabel("*Situação");
+		lblNewLabel_2.setBounds(250, 15, 61, 14);
 		getContentPane().add(lblNewLabel_2);
 		
 		
-		cboOsSit.setModel(new DefaultComboBoxModel(new String[] {"Na bancada", "Entrega OK", "Orçamento reprovado", "aguardando aprovação", "Aguardando peças", "Abandonado pelo cliente", "Retornou"}));
+		cboOsSit.setModel(new DefaultComboBoxModel(new String[] {" ", "Na bancada", "Entrega OK", "Orçamento reprovado", "aguardando aprovação", "Aguardando peças", "Abandonado pelo cliente", "Retornou"}));
 		cboOsSit.setBounds(313, 11, 184, 22);
 		getContentPane().add(cboOsSit);
 		
@@ -285,7 +289,8 @@ public class TelaOs extends JInternalFrame {
 		getContentPane().add(btnOsAdicionar);
 		
 		//CHAMA O MÉTODO ALTERAR ORDEM DE SERVIÇO
-		JButton btnOsAlterar = new JButton("");
+		
+		btnOsAlterar.setEnabled(false); //INICIA O PROGRAMA COM O BTN DESATIVADO
 		btnOsAlterar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				alterar_os();
@@ -296,18 +301,20 @@ public class TelaOs extends JInternalFrame {
 		getContentPane().add(btnOsAlterar);
 		
 		//CHAMA O MÉTODO EXLUIR ORDEM DE SERVIÇO
-		JButton btnOsRemover = new JButton("");
+		
+		btnOsRemover.setEnabled(false); //INICIA O PROGRAMA COM O BTN DESATIVADO
 		btnOsRemover.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				excluir_os();
 			}
 		});
+		btnOsRemover.setEnabled(false); //INICIA O PROGRAMA COM O BTN DESATIVADO
 		btnOsRemover.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/delete.png")));
 		btnOsRemover.setBounds(316, 428, 76, 76);
 		getContentPane().add(btnOsRemover);
 		
 		//CHAMA O MÉTODO DE PESQUISA DE ORDEM DE SERVIÇO
-		JButton btnOsPesquisar = new JButton("");
+		
 		btnOsPesquisar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pesquisa_os();
@@ -317,7 +324,8 @@ public class TelaOs extends JInternalFrame {
 		btnOsPesquisar.setBounds(118, 428, 76, 76);
 		getContentPane().add(btnOsPesquisar);
 		
-		JButton btnOsImprimir = new JButton("");
+		
+		btnOsImprimir.setEnabled(false);//INICIA O PROGRAMA COM O BTN DESATIVADO
 		btnOsImprimir.setIcon(new ImageIcon(TelaOs.class.getResource("/br/com/infox/icones/icones/print.png")));
 		btnOsImprimir.setBounds(410, 428, 76, 76);
 		getContentPane().add(btnOsImprimir);
@@ -363,13 +371,17 @@ public class TelaOs extends JInternalFrame {
 			pst.setString(8, txtCliId.getText());
 			
 			//VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS
-			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty())) {
-				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");				
+			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty()) || cboOsSit.getSelectedItem().equals(" ")) {
+				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");			
 			}else {
 				int adicionado = pst.executeUpdate();
 				if(adicionado > 0) {
 					JOptionPane.showMessageDialog(null, "Ordem de serviço emitda com sucesso!");
-					limpar();
+					
+					btnOsAdicionar.setEnabled(false);
+					btnOsPesquisar.setEnabled(false);
+					btnOsImprimir.setEnabled(true);
+					
 				}
 			}
 			
@@ -383,7 +395,7 @@ public class TelaOs extends JInternalFrame {
 		//CRIA UMA CAIXA DE ENTRADA TIPO JOption Pane
 		String num_os = JOptionPane.showInputDialog("Digite o número da OS "); //RECEBE O NUMERO DA OS
 		
-		String slq = "Select * from ordemservico where oS = " + num_os;
+		String slq = "select oS, date_format(dataOs, '%d/%m/%Y - %H:%i'), tipo, situacao, equipamento, defeito, servico, tecnico, valor, idCli from ordemservico where oS = " + num_os;
 		
 		try {
 			pst = conexao.prepareStatement(slq);
@@ -412,14 +424,25 @@ public class TelaOs extends JInternalFrame {
 				txtOSValor.setText(rs.getString(9));
 				txtCliId.setText(rs.getString(10));
 				
+				
 				//DESABILITA O BOTÃO ADICIONAR
 				btnOsAdicionar.setEnabled(false);
+				
+				//DESABILITA O BTN PESQUISAR
+				btnOsPesquisar.setEnabled(false);
 				
 				//DESABILITA O CAMPO PESQUISAR
 				txtCliPesquisar.setEnabled(false);
 				
 				//DESABILITA A VISIBILIDADE DA TABELA CLIENTES
 				tblClientes.setVisible(false);
+				
+				//ATIVA OS BTNS
+				btnOsAlterar.setEnabled(true);
+				btnOsRemover.setEnabled(true);
+				btnOsImprimir.setEnabled(true);
+				
+				
 			} else {
 				JOptionPane.showMessageDialog(null, "Ordem de serviço não cadastrada");
 			}
@@ -449,7 +472,7 @@ public class TelaOs extends JInternalFrame {
 			pst.setString(8, txtOs.getText());
 			
 			//VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS
-			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty())) {
+			if((txtCliId.getText().isEmpty() || txtOsEquipe.getText().isEmpty() || txtOsDef.getText().isEmpty()) || cboOsSit.getSelectedItem().equals(" ")) {
 				JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios");				
 			}else {
 				int adicionado = pst.executeUpdate();
@@ -457,18 +480,8 @@ public class TelaOs extends JInternalFrame {
 					JOptionPane.showMessageDialog(null, "Ordem de serviço alterada com sucesso!");
 					
 					//LIMPA OS CAMPOS
-					txtCliId.setText(null);
-					txtData.setText(null);
 					limpar();
-					
-					//HABILITA O BOTÃO ADICIONAR
-					btnOsAdicionar.setEnabled(true);
-					
-					//HABILITA O CAMPO PESQUISAR
-					txtCliPesquisar.setEnabled(true);
-					
-					//HABILITA A VISIBILIDADE DA TABELA CLIENTES
-					tblClientes.setVisible(true);
+				
 				}
 			}
 			
@@ -496,18 +509,8 @@ public class TelaOs extends JInternalFrame {
 					JOptionPane.showMessageDialog(null, "Ordem de serviço removida com sucesso.");
 					
 					//LIMPA OS CAMPOS
-					txtCliId.setText(null);
-					txtData.setText(null);
 					limpar();
 					
-					//HABILITA O BOTÃO ADICIONAR
-					btnOsAdicionar.setEnabled(true);
-					
-					//HABILITA O CAMPO PESQUISAR
-					txtCliPesquisar.setEnabled(true);
-					
-					//HABILITA A VISIBILIDADE DA TABELA CLIENTES
-					tblClientes.setVisible(true);
 				}
 			
 			} catch (Exception e) {
@@ -517,13 +520,29 @@ public class TelaOs extends JInternalFrame {
 	}
 	
 	
-	//LIMPA OS CAMPOS
+	//LIMPA OS CAMPOS e GERENCIAR OS BOTÕES
 	private void limpar() {
+		cboOsSit.setSelectedItem(" ");
 		txtCliId.setText(null);
+		txtData.setText(null);
+		txtCliId.setText(null);
+		txtCliPesquisar.setText(null);
+		((DefaultTableModel) tblClientes.getModel()).setRowCount(0);
 		txtOsEquipe.setText(null);
 		txtOsDef.setText(null);
 		txtOsServ.setText(null);
 		txtOsTec.setText(null);
 		txtOSValor.setText(null);
+		
+		//Habilita os objetos
+		btnOsAdicionar.setEnabled(true);
+		btnOsPesquisar.setEnabled(true);
+		txtCliPesquisar.setEnabled(true);
+		tblClientes.setVisible(true);
+		
+		//DESABILITA OS BOTÕES
+		btnOsAlterar.setEnabled(false);
+		btnOsRemover.setEnabled(false);
+		btnOsImprimir.setEnabled(false);
 	}
 }
